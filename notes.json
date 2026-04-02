@@ -138,6 +138,15 @@
       "filename": "Screenshot 2026-02-14 110713.png",
       "date": "2026-04-02",
       "formatted_notes": "AI formatting unavailable: Error code: 400 - {'error': {'message': 'The model `llama-3.2-11b-vision-preview` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}"
+    },
+    {
+      "student_name": "Aravind",
+      "subject": "Humanities",
+      "filename": "Screenshot 2026-02-14 074626.png",
+      "date": "2026-04-02",
+      "formatted_notes": "## Humanities \u2014 Class Notes\n\n**Key Concepts:**\n- FIGURE 9.20\n\nMy purpose in this section is to account for the frequency dependence of \u20ac\nin dielectri...\n\n**Summary:**\n- Notes extracted and formatted successfully\n- AI formatting will be enabled after quota resets\n\n**Topics Covered:**\n- See raw OCR text below for full content",
+      "raw_text": "FIGURE 9.20\n\nMy purpose in this section is to account for the frequency dependence of \u20ac\nin dielectrics, using a simplified model for the behavior of the electrons. Like all\nclassical models of atomic-scale phenomena, itis at best an approximation to the\ntruth; nevertheless, it does yield qualitatively satisfactory results, and it provides\na plausible mechanism for dispersion in transparent media,\n\n\u2018The electrons in a nonconductor are bound to specific molecules. The actual\nbinding forces can be quite complicated, but we shall picture each electron as\nattached to the end of a spring, with force constant ksping (Fig. 9.21):\n\nFinding = \u2014Kspring\u00ae = mage, (9.151)\n\nwhere x is displacement from equilibrium, m is the electron\u2019s mass, and wp is\nthe natural oscillation frequency, ./Fsping/m. [If this strikes you as an implausible\n\u2018model, look back at Ex. 4.1, where we were led to a force of precisely this form.\nAsamatter of fact, practically any binding force can be approximated this way for\nsufficiently small displacements from equilibrium, as you can see by expanding\nthe potential energy in a Taylor series about the equilibrium point:\n\nLoy\nUC) = UO) +O) + 5\u00b0U\"O +\n\n\u2018The first term is a constant, with no dynamical significance (you can always adjust\nthe zero of potential energy so that U(0) = 0). The second term automatically\nvanishes, since dU /dx = \u2014F, and by the nature of an equilibrium, the force at\nthat point is zero, The third term is precisely the potential energy of a spring with\nforce constant kypring = d?U /dx?|,, (the second derivative is positive, for a point\nof stable equilibrium). As long as the displacements are small, the higher terms in\nthe series can be neglected. Geometrically, all I am saying is that practically any\nfunction can be fit near a minimum by a suitable parabola]\n\nElectron\n\nk,\n\nspring\n\nFIGURE 9.21\n",
+      "pinned": false
     }
   ]
 }
