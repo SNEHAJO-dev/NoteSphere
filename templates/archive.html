@@ -6,7 +6,6 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -29,39 +28,11 @@
       --shadow:        0 2px 16px rgba(79,70,229,0.08);
     }
 
-    /* ── DARK MODE ── */
-    body.dark {
-      --surface:      #1e1e2e;
-      --bg:           #13131f;
-      --text:         #e2e8f0;
-      --muted:        #94a3b8;
-      --border:       #2d2d44;
-      --indigo-light: #2d2b55;
-      --shadow:       0 2px 16px rgba(0,0,0,0.3);
-    }
-    body.dark .folder-header:hover     { background: #252538; }
-    body.dark .folder-header.open      { background: #1e1e30; }
-    body.dark .tab-row                 { background: #1a1a2e; }
-    body.dark .stat-chip               { background: #1e1e2e; }
-    body.dark .search-wrap input       { background: #1e1e2e; color: var(--text); }
-    body.dark .note-item-body          { color: #cbd5e1; }
-    body.dark .pill-date               { background: #2d2d44; color: var(--muted); }
-    body.dark mark                     { background: #713f12; color: #fef3c7; }
-    body.dark .modal, body.dark .confirm-modal { background: #1e1e2e; }
-    body.dark .modal input, body.dark .modal textarea { background: #13131f; color: var(--text); border-color: var(--border); }
-    body.dark .btn-cancel              { background: #2d2d44; border-color: #3d3d55; color: var(--muted); }
-    body.dark .preview-popup           { background: #1e1e2e; border-color: #3d3d55; }
-    body.dark .tag-chip                { border-color: #3d3d55; }
-    body.dark .sort-bar select         { background: #1e1e2e; color: var(--text); border-color: var(--border); }
-    body.dark .filter-date input       { background: #1e1e2e; color: var(--text); border-color: var(--border); }
-    body.dark .bulk-bar                { background: #1e1e2e; border-color: var(--indigo); }
-
     body {
       font-family: 'Sora', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      transition: background 0.25s, color 0.25s;
     }
 
     /* ── NAV ── */
@@ -78,20 +49,12 @@
       box-shadow: 0 2px 20px rgba(79,70,229,0.25);
     }
     nav h2 { color: white; font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
-    .nav-right { display: flex; align-items: center; gap: 10px; }
     nav a {
       color: white; text-decoration: none; font-size: 13px; font-weight: 500;
       background: rgba(255,255,255,0.18); padding: 7px 16px; border-radius: 20px;
       transition: background 0.2s;
     }
     nav a:hover { background: rgba(255,255,255,0.28); }
-    .dark-toggle {
-      background: rgba(255,255,255,0.18); border: none; color: white;
-      width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
-      font-size: 15px; display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s;
-    }
-    .dark-toggle:hover { background: rgba(255,255,255,0.28); }
 
     /* ── MAIN ── */
     .archive-main { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
@@ -281,8 +244,6 @@
     .note-item:hover { border-color: var(--indigo-light); box-shadow: 0 2px 12px rgba(79,70,229,0.07); }
     .note-item:last-child { margin-bottom: 0; }
     .note-item.pinned-note { border-color: var(--amber); background: #fffbf0; }
-    body.dark .note-item.pinned-note { background: #1e1a0e; }
-
     .note-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
     .pill { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
     .pill-student { background: var(--indigo-light); color: var(--indigo); }
@@ -325,29 +286,29 @@
     }
 
     /* ── ACTION BUTTONS ── */
-    .btn-edit, .btn-del, .btn-pin, .btn-copy, .btn-export-note {
+    .btn-edit, .btn-del, .btn-pin, .btn-copy, .btn-download {
       font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 600;
       padding: 5px 10px; border-radius: 8px; cursor: pointer; border: 1.5px solid; transition: all 0.15s;
     }
-    .btn-edit  { color: var(--indigo); border-color: var(--indigo-light); background: var(--indigo-light); }
-    .btn-edit:hover  { background: #c7d2fe; border-color: #c7d2fe; }
-    .btn-del   { color: var(--red); border-color: var(--red-light); background: var(--red-light); }
-    .btn-del:hover   { background: #fca5a5; border-color: #fca5a5; }
-    .btn-pin   { color: var(--amber); border-color: var(--amber-light); background: var(--amber-light); }
-    .btn-pin:hover   { background: #fde68a; border-color: #fde68a; }
-    .btn-copy  { color: var(--green); border-color: var(--green-light); background: var(--green-light); }
-    .btn-copy:hover  { background: #a7f3d0; border-color: #a7f3d0; }
-    .btn-export-note { color: var(--muted); border-color: var(--border); background: var(--bg); }
-    .btn-export-note:hover { background: var(--border); }
+    .btn-edit     { color: var(--indigo); border-color: var(--indigo-light); background: var(--indigo-light); }
+    .btn-edit:hover     { background: #c7d2fe; border-color: #c7d2fe; }
+    .btn-del      { color: var(--red); border-color: var(--red-light); background: var(--red-light); }
+    .btn-del:hover      { background: #fca5a5; border-color: #fca5a5; }
+    .btn-pin      { color: var(--amber); border-color: var(--amber-light); background: var(--amber-light); }
+    .btn-pin:hover      { background: #fde68a; border-color: #fde68a; }
+    .btn-copy     { color: var(--green); border-color: var(--green-light); background: var(--green-light); }
+    .btn-copy:hover     { background: #a7f3d0; border-color: #a7f3d0; }
+    .btn-download { color: var(--indigo); border-color: var(--indigo-light); background: var(--indigo-light); }
+    .btn-download:hover { background: #c7d2fe; border-color: #c7d2fe; }
 
-    /* ── EXPORT FOLDER BUTTON ── */
-    .btn-export-folder {
+    /* ── FOLDER HEADER BUTTONS ── */
+    .btn-dl-all {
       font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 600;
       padding: 5px 12px; border-radius: 8px; cursor: pointer;
-      border: 1.5px solid var(--border); background: var(--bg); color: var(--muted);
+      border: 1.5px solid var(--indigo-light); background: var(--indigo-light); color: var(--indigo);
       transition: all 0.15s;
     }
-    .btn-export-folder:hover { background: var(--indigo-light); color: var(--indigo); border-color: var(--indigo-light); }
+    .btn-dl-all:hover { background: #c7d2fe; border-color: #c7d2fe; }
 
     .note-item-body { font-size: 13px; color: #374151; line-height: 1.85; }
     .note-item-body h1, .note-item-body h2 { font-size: 15px; margin-bottom: 8px; color: var(--text); font-weight: 600; }
@@ -448,10 +409,7 @@
 <body>
   <nav>
     <h2>🌐 NoteSphere</h2>
-    <div class="nav-right">
-      <a href="/">↑ Upload Notes</a>
-      <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" id="darkBtn">🌙</button>
-    </div>
+    <a href="/">↑ Upload Notes</a>
   </nav>
 
   <div class="archive-main">
@@ -483,8 +441,7 @@
           <input type="date" id="dateTo" onchange="applyFilters()">
         </div>
         <button class="btn-clear-filters" onclick="clearFilters()">✕ Clear filters</button>
-        <button class="btn-export-folder" style="margin-left:auto;" onclick="exportAllAsPDF()">📄 Export all as PDF</button>
-        <button class="btn-export-folder" onclick="toggleBulkMode()">☑️ Bulk select</button>
+        <button class="btn-dl-all" style="margin-left:auto;" onclick="toggleBulkMode()">☑️ Bulk select</button>
       </div>
 
       <!-- Search -->
@@ -519,7 +476,7 @@
             <button class="pin-folder-btn" id="pin-btn-{{ fi }}"
               onclick="event.stopPropagation(); toggleFolderPin('{{ fi }}', '{{ subject }}')"
               title="Pin folder">📌</button>
-            <button class="btn-export-folder" onclick="event.stopPropagation(); exportFolderAsPDF('{{ subject }}', '{{ fi }}')" title="Export folder as PDF">📄</button>
+            <button class="btn-dl-all" onclick="event.stopPropagation(); downloadAllImages('{{ fi }}')" title="Download all images">⬇ Download all</button>
             <span class="folder-chevron" id="chev-{{ fi }}">▶</span>
           </div>
 
@@ -552,6 +509,8 @@
                       <span>{{ note.student_name }} · {{ note.date }}</span>
                       <div class="img-card-actions">
                         <button class="btn-icon" title="View" onclick="event.stopPropagation(); openLightbox(this.closest('.img-card').querySelector('img'))">🔍</button>
+                        <button class="btn-icon" title="Download"
+                          onclick="event.stopPropagation(); downloadImage('{{ url_for('static', filename='uploads/' + note.filename) }}', '{{ note.student_name }}_{{ note.date }}_{{ subject }}')">⬇</button>
                         <button class="btn-icon del" title="Delete" onclick="confirmDelete('{{ subject }}', {{ loop.index0 }})">🗑</button>
                       </div>
                     </div>
@@ -583,8 +542,8 @@
                       <button class="btn-copy" title="Copy markdown"
                         data-content="{{ note.formatted_notes | e }}"
                         onclick="copyNote(this)">📋</button>
-                      <button class="btn-export-note" title="Export as PDF"
-                        onclick="exportNoteAsPDF('noteitem-{{ fi }}-{{ ni }}', '{{ note.student_name }}')">📄</button>
+                      <button class="btn-download" title="Download image"
+                        onclick="downloadImage('{{ url_for('static', filename='uploads/' + note.filename) }}', '{{ note.student_name }}_{{ note.date }}_{{ subject }}')">⬇ Download</button>
                       <button class="btn-edit"
                         data-subject="{{ subject }}"
                         data-index="{{ ni }}"
@@ -700,7 +659,10 @@
       <img id="lightboxImg" src="" alt="">
     </div>
     <div class="lightbox-caption" id="lightboxCaption"></div>
-    <div class="lightbox-counter" id="lightboxCounter"></div>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <div class="lightbox-counter" id="lightboxCounter"></div>
+      <button onclick="downloadCurrentLightboxImg()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;font-family:'Sora',sans-serif;font-weight:600;">⬇ Download</button>
+    </div>
     <button class="lightbox-nav lightbox-next" onclick="lightboxNav(1)">›</button>
   </div>
 
@@ -712,19 +674,6 @@
   </div>
 
   <script>
-    // ── Dark mode ──
-    (function() {
-      if (localStorage.getItem('darkMode') === '1') {
-        document.body.classList.add('dark');
-        document.getElementById('darkBtn').textContent = '☀️';
-      }
-    })();
-    function toggleDark() {
-      const on = document.body.classList.toggle('dark');
-      document.getElementById('darkBtn').textContent = on ? '☀️' : '🌙';
-      localStorage.setItem('darkMode', on ? '1' : '0');
-    }
-
     // ── Folder toggle ──
     function toggleFolder(id) {
       const body   = document.getElementById('body-'   + id);
@@ -999,48 +948,48 @@
       setTimeout(() => location.reload(), 900);
     }
 
-    // ── PDF Export ──
-    function exportNoteAsPDF(noteId, studentName) {
-      const el = document.getElementById(noteId);
-      if (!el) return;
-      showToast('📄 Generating PDF…');
-      html2pdf().set({
-        margin: 10, filename: studentName + '_note.pdf',
-        html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' }
-      }).from(el).save();
+    // ── Image Download ──
+    function downloadImage(url, filename) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename.replace(/\s+/g, '_') + '.jpg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('⬇ Downloading image…');
     }
-    function exportFolderAsPDF(subject, folderIdx) {
-      const body = document.getElementById('body-' + folderIdx);
-      const notesTab = body?.querySelector('.tab-content:last-child');
-      if (!notesTab) return;
-      showToast('📄 Generating PDF for ' + subject + '…');
-      const wrapper = document.createElement('div');
-      wrapper.style.padding = '20px';
-      wrapper.innerHTML = '<h2 style="margin-bottom:16px;font-family:sans-serif">' + subject + ' — Notes</h2>' + notesTab.innerHTML;
-      html2pdf().set({
-        margin: 10, filename: subject + '_notes.pdf',
-        html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' }
-      }).from(wrapper).save();
+
+    async function downloadAllImages(folderIdx) {
+      const grid = document.querySelector('#images-' + folderIdx + ' .img-grid');
+      if (!grid) return;
+      const imgs = grid.querySelectorAll('img');
+      if (!imgs.length) { showToast('⚠️ No images to download'); return; }
+      showToast('⬇ Downloading ' + imgs.length + ' image(s)…');
+      for (const img of imgs) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        const url  = img.dataset.src || img.src;
+        const name = (img.dataset.caption || 'note').replace(/[·\s]+/g, '_');
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = name + '.jpg';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
     }
-    function exportAllAsPDF() {
-      showToast('📄 Generating full archive PDF…');
-      const wrapper = document.createElement('div');
-      wrapper.style.padding = '20px';
-      wrapper.innerHTML = '<h1 style="margin-bottom:24px;font-family:sans-serif">NoteSphere — Full Archive</h1>';
-      document.querySelectorAll('.folder').forEach(folder => {
-        const subject = folder.querySelector('.folder-name')?.textContent || '';
-        const notesTab = folder.querySelector('.tab-content:last-child');
-        if (notesTab) {
-          const sec = document.createElement('div');
-          sec.style.marginBottom = '32px';
-          sec.innerHTML = '<h2 style="font-family:sans-serif;margin-bottom:12px">' + subject + '</h2>' + notesTab.innerHTML;
-          wrapper.appendChild(sec);
-        }
-      });
-      html2pdf().set({
-        margin: 10, filename: 'NoteSphere_Archive.pdf',
-        html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' }
-      }).from(wrapper).save();
+
+    function downloadCurrentLightboxImg() {
+      const img  = _lbImgs[_lbIdx];
+      const url  = img?.dataset.src || img?.src || '';
+      const name = (img?.dataset.caption || 'note').replace(/[·\s]+/g, '_');
+      if (!url) return;
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = name + '.jpg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('⬇ Downloading image…');
     }
 
     // ── Edit Modal ──

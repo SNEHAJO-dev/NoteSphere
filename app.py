@@ -1,292 +1,182 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 from dotenv import load_dotenv
 import os
-import base64
+import pytesseract
+from PIL import Image
+from google import genai
 import json
-import mimetypes
-import uuid
 from datetime import date
-from werkzeug.utils import secure_filename
-from groq import Groq
- 
+from flask import jsonify
+
 load_dotenv()
- 
-# ─────────────────────────────────────────────
-#  App & Config
-# ─────────────────────────────────────────────
+
 app = Flask(__name__)
- 
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB hard cap
- 
-# Absolute path so it works regardless of working directory
-NOTES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.json")
- 
-ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
- 
-groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
- 
- 
-# ─────────────────────────────────────────────
-#  Utility Helpers
-# ─────────────────────────────────────────────
-def allowed_file(filename: str) -> bool:
-    """Whitelist-check the file extension."""
-    return (
-        "." in filename
-        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-    )
- 
- 
-def encode_image(image_path: str) -> tuple[str, str]:
-    """
-    Base64-encode the image and detect its real MIME type.
-    Returns (base64_string, mime_type).
-    """
-    mime_type, _ = mimetypes.guess_type(image_path)
-    mime_type = mime_type or "image/jpeg"
-    with open(image_path, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode("utf-8")
-    return b64, mime_type
- 
- 
-def sanitize_field(value: str, max_len: int = 100) -> str:
-    """Strip prompt-injection characters and cap length."""
-    return value[:max_len].replace('"', "").replace("\n", " ").strip()
- 
- 
-# ─────────────────────────────────────────────
-#  AI Formatting
-# ─────────────────────────────────────────────
-def extract_and_format_notes(image_path: str, subject: str) -> str | None:
-    """
-    Send the image to Groq vision model.
-    Returns formatted notes string, or None on failure.
-    """
-    b64_image, mime_type = encode_image(image_path)
-    safe_subject = sanitize_field(subject)
- 
-    prompt = f"""You are an academic notes formatter for a student app.
-This is a photo of handwritten class notes for the subject: {safe_subject}.
- 
-Please:
-1. Read all the handwritten text carefully
-2. Fix any unclear words using context
-3. Format the notes into:
-   - A clear heading with the subject
-   - Bullet points for key concepts
-   - Sub-bullets for details
-   - Keep it academic and concise
- 
-Return only the formatted notes, nothing else."""
- 
-    try:
-        response = groq_client.chat.completions.create(
-            model="llama-3.2-11b-vision-preview",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:{mime_type};base64,{b64_image}"
-                            },
-                        },
-                        {"type": "text", "text": prompt},
-                    ],
-                }
-            ],
-            max_tokens=1024,
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        app.logger.error(f"Groq API error: {e}")
-        return None
- 
- 
-# ─────────────────────────────────────────────
-#  JSON Persistence
-# ─────────────────────────────────────────────
-def load_notes() -> list:
-    """Load all notes from the JSON store. Returns empty list on any failure."""
+NOTES_FILE = "notes.json"
+
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+
+def format_notes_with_ai(raw_text, subject):
+    return f"""## {subject} — Class Notes
+
+**Key Concepts:**
+- {raw_text[:100]}...
+
+**Summary:**
+- Notes extracted and formatted successfully
+- AI formatting will be enabled after quota resets
+
+**Topics Covered:**
+- See raw OCR text below for full content"""
+
+def load_notes():
     if not os.path.exists(NOTES_FILE):
         return []
-    try:
-        with open(NOTES_FILE, "r") as f:
-            data = json.load(f)
-            return data.get("notes", [])
-    except (json.JSONDecodeError, IOError) as e:
-        app.logger.error(f"Failed to load notes: {e}")
-        return []
- 
- 
-def save_note(
-    student_name: str,
-    subject: str,
-    image_filename: str,
-    formatted_notes: str,
-) -> str:
-    """
-    Append a new note to notes.json and write a companion .txt file.
-    Returns the generated note ID.
-    """
+    with open(NOTES_FILE, "r") as f:
+        data = json.load(f)
+        return data.get("notes", [])
+
+def save_note(student_name, subject, filename, formatted_notes, raw_text):
     notes = load_notes()
-    note_id = str(uuid.uuid4())
- 
     new_note = {
-        "id": note_id,
         "student_name": student_name,
         "subject": subject,
-        "image_filename": image_filename,
-        "txt_filename": image_filename.rsplit(".", 1)[0] + ".txt",
+        "filename": filename,
         "date": str(date.today()),
         "formatted_notes": formatted_notes,
+        "raw_text": raw_text,
+        "pinned": False  # new field
     }
     notes.append(new_note)
- 
-    # ── Write JSON store ──────────────────────
     with open(NOTES_FILE, "w") as f:
         json.dump({"notes": notes}, f, indent=2)
- 
-    # ── Write companion .txt file ─────────────
-    txt_path = os.path.join(
-        app.config["UPLOAD_FOLDER"],
-        new_note["txt_filename"],
-    )
-    with open(txt_path, "w", encoding="utf-8") as f:
-        f.write(f"Student : {student_name}\n")
-        f.write(f"Subject : {subject}\n")
-        f.write(f"Date    : {date.today()}\n")
-        f.write("─" * 40 + "\n\n")
-        f.write(formatted_notes)
- 
-    return note_id
- 
- 
-# ─────────────────────────────────────────────
-#  Web Routes
-# ─────────────────────────────────────────────
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
- 
- 
+
 @app.route("/archive")
 def archive():
     notes = load_notes()
-    grouped: dict = {}
+    grouped = {}
     for note in notes:
-        subj = note["subject"]
-        grouped.setdefault(subj, []).append(note)
-    return render_template("archive.html", grouped=grouped)
- 
- 
+        subject = note["subject"]
+        if subject not in grouped:
+            grouped[subject] = []
+        grouped[subject].append(note)
+    # Fix: count total notes properly
+    total_notes = sum(len(v) for v in grouped.values())
+    return render_template("archive.html", grouped=grouped, total_notes=total_notes)
+
+
 @app.route("/upload", methods=["POST"])
 def upload():
-    student_name = request.form.get("student_name", "").strip()
-    subject      = request.form.get("subject", "").strip()
-    image        = request.files.get("notes_image")
- 
-    # ── Input validation ──────────────────────
-    if not student_name or not subject:
-        return "Missing name or subject. Please go back and fill in all fields.", 400
- 
+    student_name = request.form.get("student_name")
+    subject = request.form.get("subject")
+    image = request.files.get("notes_image")
+
     if not image or image.filename == "":
-        return "No image uploaded. Please go back and try again.", 400
- 
-    if not allowed_file(image.filename):
-        return "Invalid file type. Please upload a JPG, PNG, or WEBP image.", 400
- 
-    # ── Secure, collision-proof filename ─────
-    ext           = image.filename.rsplit(".", 1)[1].lower()
-    safe_filename = f"{uuid.uuid4().hex}.{ext}"
-    image_path    = os.path.join(app.config["UPLOAD_FOLDER"], safe_filename)
- 
-    try:
-        image.save(image_path)
-    except Exception as e:
-        app.logger.error(f"Image save failed: {e}")
-        return "Failed to save uploaded image. Please try again.", 500
- 
-    # ── AI processing ─────────────────────────
-    formatted_notes = extract_and_format_notes(image_path, subject)
- 
-    if not formatted_notes:
-        # Clean up orphaned image
-        if os.path.exists(image_path):
-            os.remove(image_path)
-        return "AI processing failed. Please try again in a moment.", 500
- 
-    note_id = save_note(student_name, subject, safe_filename, formatted_notes)
- 
-    return render_template(
-        "result.html",
+        return "No image uploaded. Please go back and try again."
+
+    image_path = os.path.join(app.config["UPLOAD_FOLDER"], image.filename)
+    image.save(image_path)
+
+    img = Image.open(image_path)
+    extracted_text = pytesseract.image_to_string(img)
+    formatted_notes = format_notes_with_ai(extracted_text, subject)
+
+    save_note(student_name, subject, image.filename, formatted_notes, extracted_text)
+
+    return render_template("result.html",
         student_name=student_name,
         subject=subject,
-        filename=safe_filename,
-        txt_filename=safe_filename.rsplit(".", 1)[0] + ".txt",
-        formatted_notes=formatted_notes,
-        note_id=note_id,
+        filename=image.filename,
+        extracted_text=extracted_text,
+        formatted_notes=formatted_notes
     )
- 
- 
-# ─────────────────────────────────────────────
-#  JSON API  (for frontend / AJAX access)
-# ─────────────────────────────────────────────
-@app.route("/api/notes", methods=["GET"])
-def api_all_notes():
-    """Return every note as JSON."""
+
+@app.route("/edit_note", methods=["POST"])
+def edit_note():
+    data = request.get_json()
+    subject     = data.get("subject")
+    index       = data.get("index")
+    new_student = data.get("student_name", "").strip()
+    new_content = data.get("formatted_notes", "").strip()
+
+    if not subject or index is None or not new_student or not new_content:
+        return jsonify({"error": "Missing fields"}), 400
+
     notes = load_notes()
-    return jsonify({"count": len(notes), "notes": notes})
- 
- 
-@app.route("/api/notes/subject/<string:subject>", methods=["GET"])
-def api_notes_by_subject(subject: str):
-    """Return all notes for a given subject (case-insensitive)."""
-    notes = load_notes()
-    filtered = [n for n in notes if n["subject"].lower() == subject.lower()]
-    return jsonify({"subject": subject, "count": len(filtered), "notes": filtered})
- 
- 
-@app.route("/api/notes/<string:note_id>", methods=["GET"])
-def api_note_by_id(note_id: str):
-    """Return a single note by its UUID."""
-    notes = load_notes()
-    note  = next((n for n in notes if n.get("id") == note_id), None)
-    if not note:
+    subject_notes = [n for n in notes if n["subject"] == subject]
+    if index < 0 or index >= len(subject_notes):
         return jsonify({"error": "Note not found"}), 404
-    return jsonify(note)
- 
- 
-@app.route("/api/notes/student/<string:student_name>", methods=["GET"])
-def api_notes_by_student(student_name: str):
-    """Return all notes for a given student (case-insensitive)."""
-    notes    = load_notes()
-    filtered = [
-        n for n in notes
-        if n["student_name"].lower() == student_name.lower()
-    ]
-    return jsonify({"student": student_name, "count": len(filtered), "notes": filtered})
- 
- 
-# ─────────────────────────────────────────────
-#  Error Handlers
-# ─────────────────────────────────────────────
-@app.errorhandler(413)
-def too_large(_):
-    return "File too large. Maximum upload size is 10 MB.", 413
- 
- 
-@app.errorhandler(500)
-def server_error(_):
-    return "Internal server error. Please try again.", 500
- 
- 
-# ─────────────────────────────────────────────
-#  Entry Point
-# ─────────────────────────────────────────────
-if __name__ == "_main_":
+
+    target = subject_notes[index]
+    for note in notes:
+        if note is target:
+            note["student_name"]    = new_student
+            note["formatted_notes"] = new_content
+            break
+
+    with open(NOTES_FILE, "w") as f:
+        json.dump({"notes": notes}, f, indent=2)
+    return jsonify({"success": True})
+
+
+@app.route("/delete_note", methods=["POST"])
+def delete_note():
+    data    = request.get_json()
+    subject = data.get("subject")
+    index   = data.get("index")
+
+    if not subject or index is None:
+        return jsonify({"error": "Missing fields"}), 400
+
+    notes = load_notes()
+    subject_notes = [n for n in notes if n["subject"] == subject]
+    if index < 0 or index >= len(subject_notes):
+        return jsonify({"error": "Note not found"}), 404
+
+    target = subject_notes[index]
+    notes  = [n for n in notes if n is not target]
+
+    with open(NOTES_FILE, "w") as f:
+        json.dump({"notes": notes}, f, indent=2)
+    return jsonify({"success": True})
+
+
+@app.route("/pin_note", methods=["POST"])
+def pin_note():
+    data    = request.get_json()
+    subject = data.get("subject")
+    index   = data.get("index")
+    pinned  = data.get("pinned", True)
+
+    if not subject or index is None:
+        return jsonify({"error": "Missing fields"}), 400
+
+    notes = load_notes()
+    subject_notes = [n for n in notes if n["subject"] == subject]
+    if index < 0 or index >= len(subject_notes):
+        return jsonify({"error": "Note not found"}), 404
+
+    target = subject_notes[index]
+    for note in notes:
+        if note is target:
+            note["pinned"] = pinned
+            break
+
+    with open(NOTES_FILE, "w") as f:
+        json.dump({"notes": notes}, f, indent=2)
+    return jsonify({"success": True})
+
+
+if __name__ == "__main__":
     app.run(debug=True)
