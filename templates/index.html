@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>NoteSphere</title>
+  <title> NoteSphere</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -14,12 +14,11 @@
   <a href="/archive">View Archive</a>
   </nav>
 
-  <div class="hero">
-    <h1>Upload Today's Notes</h1>
-    <p>One student. One upload. Everyone benefits.</p>
-  </div>
-
-  <div class="card">
+  <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:0; max-width:860px; margin:40px auto; padding:0 20px; background:white; border-radius:16px; box-shadow:0 4px 24px rgba(79,70,229,0.09); border:1px solid #e5e7eb; overflow:hidden;">
+    <div style="padding:32px 28px; border-right:1px solid #e5e7eb;">
+    <h1 style="font-size:22px; font-weight:700; margin-bottom:4px">Upload Daily Notes</h1>
+    <p style="font-size:13px; color:#6b7280; margin-bottom:24px">One student. One upload. Everyone benefits.</p>
+    
   <form action="/upload" method="POST"
         enctype="multipart/form-data">
     <div class="form-group">
@@ -36,6 +35,12 @@
         <option>ECE</option>
       </select>
     </div>
+    <div class="form-group">
+      <label>Chapter</label>
+      <input type="text" ="chapter_name"
+             placeholder="e.g. Wave Optics">
+
+    </div>
 
     <div class="form-group">
       <label>Notes Image</label>
@@ -50,11 +55,17 @@
       </label>
       <div id="file-label" class="file-chosen"
            style="display:none"></div>
-    </div>
+
     <button type="submit" class="btn-primary">
       Upload & Process Notes
     </button>
   </form>
+  </div>
+  </div>
+  <div style="padding:32px 24px;"> 
+    <p style="font-weight:700; font-size:15px; margin-bottom:16px">🗓 Today's Upload Status</p>
+    <div id="status-list" style="display:flex; flex-direction:column; gap:10px"></div>
+    <div class="card" style="margin-left:auto; width:90%; align-self:start"></div>
   </div>
 
   <script>
@@ -66,7 +77,41 @@
     }
   }
   </script>
-
+  <footer style="text-align:center; padding:18px; font-size:12px; color:#b0b7c3">
+    © 2023 NoteSphere. All rights reserved.
+  </footer>
+  <script>
+    fetch('/status')
+      .then(r => r.json())
+      .then(data => {
+        const list = document.getElementById('status-list');
+        for (const [subject, uploaded] of Object.entries(data)) {
+          list.innerHTML += `
+            <div style="display:flex; align-items:center; gap:12px;
+              padding:12px 16px; border-radius:12px;
+              border:1.5px solid ${uploaded ? '#6ee7b7' : '#e5e7eb'};
+              background:${uploaded ? '#d1fae5' : '#fafafa'};">
+              <div style="width:22px; height:22px; border-radius:50%;
+                background:${uploaded ? '#10b981' : 'white'};
+                border:2px solid ${uploaded ? '#10b981' : '#e5e7eb'};
+                display:flex; align-items:center; justify-content:center;
+                font-size:12px; color:white; flex-shrink:0;">
+                ${uploaded ? '✓' : ''}
+              </div>
+              <span style="flex:1; font-size:14px; font-weight:500;
+                color:${uploaded ? '#065f46' : '#1a1a2e'};">
+                ${subject}
+              </span>
+              <span style="font-size:10px; font-weight:700; padding:3px 9px;
+                border-radius:20px; text-transform:uppercase;
+                background:${uploaded ? '#10b981' : '#f3f4f6'};
+                color:${uploaded ? 'white' : '#9ca3af'};">
+                ${uploaded ? 'Uploaded' : 'Pending'}
+              </span>
+            </div>`;
+        }
+      });
+  </script>
 
 </body>
 </html>

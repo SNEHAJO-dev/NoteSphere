@@ -147,6 +147,90 @@
       "formatted_notes": "## Humanities \u2014 Class Notes\n\n**Key Concepts:**\n- FIGURE 9.20\n\nMy purpose in this section is to account for the frequency dependence of \u20ac\nin dielectri...\n\n**Summary:**\n- Notes extracted and formatted successfully\n- AI formatting will be enabled after quota resets\n\n**Topics Covered:**\n- See raw OCR text below for full content",
       "raw_text": "FIGURE 9.20\n\nMy purpose in this section is to account for the frequency dependence of \u20ac\nin dielectrics, using a simplified model for the behavior of the electrons. Like all\nclassical models of atomic-scale phenomena, itis at best an approximation to the\ntruth; nevertheless, it does yield qualitatively satisfactory results, and it provides\na plausible mechanism for dispersion in transparent media,\n\n\u2018The electrons in a nonconductor are bound to specific molecules. The actual\nbinding forces can be quite complicated, but we shall picture each electron as\nattached to the end of a spring, with force constant ksping (Fig. 9.21):\n\nFinding = \u2014Kspring\u00ae = mage, (9.151)\n\nwhere x is displacement from equilibrium, m is the electron\u2019s mass, and wp is\nthe natural oscillation frequency, ./Fsping/m. [If this strikes you as an implausible\n\u2018model, look back at Ex. 4.1, where we were led to a force of precisely this form.\nAsamatter of fact, practically any binding force can be approximated this way for\nsufficiently small displacements from equilibrium, as you can see by expanding\nthe potential energy in a Taylor series about the equilibrium point:\n\nLoy\nUC) = UO) +O) + 5\u00b0U\"O +\n\n\u2018The first term is a constant, with no dynamical significance (you can always adjust\nthe zero of potential energy so that U(0) = 0). The second term automatically\nvanishes, since dU /dx = \u2014F, and by the nature of an equilibrium, the force at\nthat point is zero, The third term is precisely the potential energy of a spring with\nforce constant kypring = d?U /dx?|,, (the second derivative is positive, for a point\nof stable equilibrium). As long as the displacements are small, the higher terms in\nthe series can be neglected. Geometrically, all I am saying is that practically any\nfunction can be fit near a minimum by a suitable parabola]\n\nElectron\n\nk,\n\nspring\n\nFIGURE 9.21\n",
       "pinned": false
+    },
+    {
+      "student_name": "Aravind",
+      "subject": "Humanities",
+      "filename": "Screenshot 2026-02-14 074626.png",
+      "date": "2026-04-02",
+      "formatted_notes": "## Humanities \u2014 Class Notes\n\n**Key Concepts:**\n- FIGURE 9.20\n\nMy purpose in this section is to account for the frequency dependence of \u20ac\nin dielectri...\n\n**Summary:**\n- Notes extracted and formatted successfully\n- AI formatting will be enabled after quota resets\n\n**Topics Covered:**\n- See raw OCR text below for full content",
+      "raw_text": "FIGURE 9.20\n\nMy purpose in this section is to account for the frequency dependence of \u20ac\nin dielectrics, using a simplified model for the behavior of the electrons. Like all\nclassical models of atomic-scale phenomena, itis at best an approximation to the\ntruth; nevertheless, it does yield qualitatively satisfactory results, and it provides\na plausible mechanism for dispersion in transparent media,\n\n\u2018The electrons in a nonconductor are bound to specific molecules. The actual\nbinding forces can be quite complicated, but we shall picture each electron as\nattached to the end of a spring, with force constant ksping (Fig. 9.21):\n\nFinding = \u2014Kspring\u00ae = mage, (9.151)\n\nwhere x is displacement from equilibrium, m is the electron\u2019s mass, and wp is\nthe natural oscillation frequency, ./Fsping/m. [If this strikes you as an implausible\n\u2018model, look back at Ex. 4.1, where we were led to a force of precisely this form.\nAsamatter of fact, practically any binding force can be approximated this way for\nsufficiently small displacements from equilibrium, as you can see by expanding\nthe potential energy in a Taylor series about the equilibrium point:\n\nLoy\nUC) = UO) +O) + 5\u00b0U\"O +\n\n\u2018The first term is a constant, with no dynamical significance (you can always adjust\nthe zero of potential energy so that U(0) = 0). The second term automatically\nvanishes, since dU /dx = \u2014F, and by the nature of an equilibrium, the force at\nthat point is zero, The third term is precisely the potential energy of a spring with\nforce constant kypring = d?U /dx?|,, (the second derivative is positive, for a point\nof stable equilibrium). As long as the displacements are small, the higher terms in\nthe series can be neglected. Geometrically, all I am saying is that practically any\nfunction can be fit near a minimum by a suitable parabola]\n\nElectron\n\nk,\n\nspring\n\nFIGURE 9.21\n",
+      "pinned": false
+    },
+    {
+      "student_name": "Ann",
+      "subject": "Humanities",
+      "filename": "Screenshot 2026-04-02 143707.png",
+      "date": "2026-04-03",
+      "formatted_notes": "AI formatting unavailable: Error code: 400 - {'error': {'message': 'The model `llama-3.2-11b-vision-preview` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}",
+      "pinned": false
+    },
+    {
+      "student_name": "jho",
+      "subject": "Humanities",
+      "filename": "Screenshot 2026-04-02 144658.png",
+      "date": "2026-04-03",
+      "formatted_notes": "## **Humanities**\nNo relevant information for Humanities subject. \n\nThe text appears to be an advertisement for a company called \"Simply Noted\" that offers a robotic technology to write messages and envelopes with a genuine real pen, indistinguishable from human handwriting. \n\nIf there were actual notes, they could be formatted as:\n* No key concepts to extract. \n\nHowever, given the context and the apparent lack of relevant academic content, the output remains: \n\n## **Humanities**\n* No relevant information.",
+      "pinned": false
+    },
+    {
+      "student_name": "jho",
+      "subject": "Humanities",
+      "filename": "Screenshot 2026-04-02 144658.png",
+      "date": "2026-04-03",
+      "formatted_notes": "## **Humanities**\nNo relevant information for Humanities subject. \n\nThe text appears to be an advertisement for a company called \"Simply Noted\" that offers a service to write messages and envelopes with a robotic technology that mimics human handwriting. \n\nHowever, as there are no notes to format, here is a note to indicate this:\n\n* No notes available.",
+      "pinned": false
+    },
+    {
+      "student_name": "Sneha",
+      "subject": "ECE",
+      "filename": "Embedded-System-Design-Notes-written-by-Arun-Kumar-G-Associate-Professor-Dept-of-E-C-STJIT-Ranebennur-Karnataka-INDIA-3-320.webp",
+      "date": "2026-04-03",
+      "formatted_notes": "## Embedded Systems\nThe main characteristics of an embedded system are:\n* **Single-functioned**\n\t+ An embedded system usually executes a specific program repeatedly. \n\t+ E.g.: A pager. It always executes a pager.\n\t+ A desktop system executes a variety of programs like \n\t\t- spreadsheets \n\t\t- word processors \n\t\t- and video games, \n\twith new programs added frequently. One case is where an embedded system's program is updated with a newer program version. \n\t+ E.g.: Some cell phones can be updated in such a newer program version.\n\t+ A second case is where several programs are swapped in and out of a system due to size limitations. \n\t+ E.g.: Some mobiles run one program while in cruise mode, then load a second program for linking onto a target.\n* **Tightly Constrained**\n\t+ All computing systems have constraints on design metrics, but those on embedded systems can be extremely tight.\n\t+ A design metric is a measure of an implementation's attributes, such as \n\t\t- cost \n\t\t- size \n\t\t- performance \n\t\t- and power.\n* **Reactive and Real Time**",
+      "pinned": false
+    },
+    {
+      "student_name": "Sneha",
+      "subject": "ECE",
+      "filename": "Embedded-System-Design-Notes-written-by-Arun-Kumar-G-Associate-Professor-Dept-of-E-C-STJIT-Ranebennur-Karnataka-INDIA-3-320.webp",
+      "date": "2026-04-03",
+      "formatted_notes": "**Embedded Systems**\n======================\n\n### Main Characteristics of Embedded Systems\n\n* **1) Single-functioned**\n\t+ An embedded system usually executes a specific program repeatedly.\n\t+ E.g.: A pager. It always executes a pager.\n\t+ A desktop system executes a variety of programs like word processors and video games, with new programs added frequently. One case is where an embedded system's program is updated with a newer program version.\n\t+ E.g.: Some cell phones can be updated in such a newer program version.\n\t+ A second case is where several programs are swapped in and out of a system due to size limitations.\n\t+ E.g.: Some mobiles run one program while in cruise mode; then load a second program for linking onto a target.\n* **2) Tightly Constrained**\n\t+ All computing systems have constraints on design metrics, but those on embedded systems can be extremely tight.\n\t+ A design metric is a measure of an implementation's attributes, such as cost, size, performance, and power.\n* **3) Reactive and Real-time**",
+      "pinned": false
+    },
+    {
+      "student_name": "Sneha",
+      "subject": "ECE",
+      "filename": "Embedded-System-Design-Notes-written-by-Arun-Kumar-G-Associate-Professor-Dept-of-E-C-STJIT-Ranebennur-Karnataka-INDIA-3-320.webp",
+      "date": "2026-04-03",
+      "formatted_notes": "**Embedded Systems Notes (ECE)**\n=====================================\n\nThe main characteristics of an embedded system are:\n\n* **1) Single-functioned**\n\t+ An embedded system usually executes a specific program repetitively. \n\t+ E.g.: A pager - it always displays a pager.\n\t+ A desktop system executes a variety of programs like \n\t\tsymbols, word processors, and video games, with new programs added frequently. One case is where an embedded system's program is updated with a newer program version. \n\t+ E.g.: Some cell phones can be updated in such a newer program version.\n\t+ A second case is where several programs are swapped in and out of a system due to size limitations. \n\t+ E.g.: Some mobiles run one program while in cruise mode, then load a second program for linking onto a target.\n* **2) Tightly Constrained**\n\t+ All computing systems have constraints on design metrics, but those on embedded systems can be extremely tight. \n\t+ A design metric is a measure of an implementation's \n\t\t- cost\n\t\t- size\n\t\t- performance\n\t\t- power\n* **3) Reactive and real-time**",
+      "pinned": false
+    },
+    {
+      "student_name": "Anushka",
+      "subject": "Physics",
+      "chapter": "",
+      "filename": "Screenshot 2026-02-14 074633.png",
+      "date": "2026-04-03",
+      "formatted_notes": "**Physics Notes: Damped Harmonic Oscillator and Radiation Damping**\n===========================================================\n\n### Damping Force on an Electron\n\n* The damping force on the electron is given by:\n  * $F_{\\text{damping}} = -m\\gamma \\frac{dx}{dt}$ (9.152)\n  * The damping must be opposite in direction to the velocity, and making it proportional to the velocity is the easiest way to accomplish this.\n\n### Driving Force on an Electron\n\n* In the presence of an electromagnetic wave of frequency $\\omega$, polarized in the $x$ direction (Fig. 9.21), the electron is subject to a driving force:\n  * $F_{\\text{driving}} = qE = qE_0 \\cos(\\omega t)$ (9.153)\n  * $E_0$ is the amplitude of the wave at the point $z$ where the electron is situated.\n\n### Equation of Motion\n\n* The cause of the damping does not concern us here\u2014among other things, an oscillating charge radiates, and the radiation siphons off energy. We will calculate this \"radiation damping\" in Chapter 11.\n* Putting all this into Newton's second law gives:\n  * $m \\frac{d^2x}{dt^2} = F_{\\text{tot}} = F_{\\text{binding}} + F_{\\text{damping}} + F_{\\text{driving}}$\n  * $m \\frac{d^2x}{dt^2} + m\\gamma \\frac{dx}{dt} + m\\omega_0^2x = qE_0 \\cos(\\omega t)$ (9.154)\n\n### Complex Equation\n\n* Equation 9.154 is easier to handle if we regard it as the real part of a complex equation:\n  * $\\frac{d^2\\tilde{x}}{dt^2} + \\gamma \\frac{d\\tilde{x}}{dt} + \\omega_0^2 \\tilde{x} = \\frac{q}{m} E_0 e^{-i\\omega t}$ (9.155)\n\n### Steady-State Solution\n\n* In the steady state, the system oscillates at the driving frequency:\n  * $\\tilde{x}(t) = \\tilde{x}_0 e^{-i\\omega t}$ (9.156)\n* Inserting this into Eq. 9.155, we obtain:\n  * $\\tilde{x}_0 = \\frac{q/m}{\\omega_0^2 - \\omega^2 - i\\gamma\\omega} E_0$ (9.157)\n\n### Dipole Moment\n\n* The resulting dipole moment is the real part of:\n  * $\\tilde{p}(t) = q\\tilde{x}(t) = \\frac{q^2/m}{\\omega_0^2 - \\omega^2 - i\\gamma\\omega} E_0 e^{-i\\omega t}$ (9.158)",
+      "pinned": false
+    },
+    {
+      "student_name": "Ann",
+      "subject": "Humanities",
+      "chapter": "",
+      "filename": "Embedded-System-Design-Notes-written-by-Arun-Kumar-G-Associate-Professor-Dept-of-E-C-STJIT-Ranebennur-Karnataka-INDIA-3-320.webp",
+      "date": "2026-04-03",
+      "formatted_notes": "# Embedded Systems\nThe main characteristics of an embedded system are:\n* **Single-functioned**\n  * An embedded system usually executes a specific program repeatedly.  \n  * E.g.: A pager. It always is a pager.\n  * A desktop system executes a variety of programs like word processors and video games, with new programs added frequently. One case is where an embedded system's program is updated with a newer program version.  \n  * E.g.: Some cell phones can be updated in such a newer program version.\n  * A second case is where several programs are swapped in and out of a system due to size limitations.  \n  * E.g.: Some mobiles run one program while in cruise mode, then load a second program for linking onto a target.\n* **Tightly Constrained**\n  * All computing systems have constraints on design metrics, but those on embedded systems can be extremely tight.  \n  * A design metric is a measure of an implementation's attributes, such as cost, size, performance and power.\n* **Reactive and real time**",
+      "pinned": false
+    },
+    {
+      "student_name": "Ann",
+      "subject": "Humanities",
+      "chapter": "",
+      "filename": "Embedded-System-Design-Notes-written-by-Arun-Kumar-G-Associate-Professor-Dept-of-E-C-STJIT-Ranebennur-Karnataka-INDIA-3-320.webp",
+      "date": "2026-04-03",
+      "formatted_notes": "# **Embedded Systems Notes**\n## Main Characteristics of Embedded Systems\n* **Single-functioned**\n  * An embedded system usually executes a specific program repeatedly.\n  * E.g.: A pager. It always executes a pager.\n  * A desktop system executes a variety of programs like word processors and video games, with new programs added frequently. One case is where an embedded system's program is updated with a newer program version.\n  * E.g.: Some cell phones can be updated in such a newer program version.\n\n* A second case is where several programs are swapped in and out of a system due to size limitations.\n  * E.g.: Some mobiles run one program while in cruise mode, then load a second program for linking onto a target.\n\n* **Tightly Constrained**\n  * All computing systems have constraints on design metrics, but those on embedded systems can be extremely tight.\n  * A design metric is a measure of an implementation's attributes, such as cost, size, performance and power.",
+      "pinned": false
     }
   ]
 }
