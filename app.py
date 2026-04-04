@@ -2,29 +2,36 @@ from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import os
 import base64
-import json
 from datetime import date
 from groq import Groq
+import cloudinary
+import cloudinary.uploader
+from pymongo import MongoClient
 
 load_dotenv()
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = "static/uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-NOTES_FILE = "notes.json"
 SUBJECTS = ["Humanities", "Physics", "Maths", "ECE"]
 
+# ── Cloudinary ──────────────────────────────────────────────
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
+
+# ── MongoDB ─────────────────────────────────────────────────
+mongo_client = MongoClient(os.getenv("MONGODB_URI"))
+db = mongo_client["notesphere"]
+notes_col = db["notes"]
+
+# ── Groq ────────────────────────────────────────────────────
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-def encode_image(image_path):
-    with open(image_path, "rb") as f:
-        return base64.b64encode(f.read()).decode("utf-8")
 
-def extract_and_format_notes(image_path, subject):
-    base64_image = encode_image(image_path)
-    ext = image_path.rsplit(".", 1)[-1].lower()
+def extract_and_format_notes(image_bytes, ext, subject):
+    base64_image = base64.b64encode(image_bytes).decode("utf-8")
     mime = "image/png" if ext == "png" else "image/jpeg"
 
     prompt = f"""You are an academic notes formatter for a student app.
@@ -49,14 +56,9 @@ Return only the formatted notes in markdown, nothing else."""
                 "content": [
                     {
                         "type": "image_url",
-                        "image_url": {
-                            "url": f"data:{mime};base64,{base64_image}"
-                        }
+                        "image_url": {"url": f"data:{mime};base64,{base64_image}"}
                     },
-                    {
-                        "type": "text",
-                        "text": prompt
-                    }
+                    {"type": "text", "text": prompt}
                 ]
             }],
             max_tokens=1024
@@ -65,31 +67,28 @@ Return only the formatted notes in markdown, nothing else."""
     except Exception as e:
         return f"AI formatting unavailable: {str(e)}"
 
-def load_notes():
-    if not os.path.exists(NOTES_FILE):
-        return []
-    with open(NOTES_FILE, "r") as f:
-        data = json.load(f)
-        return data.get("notes", [])
 
-def save_note(student_name, subject, chapter, filename, formatted_notes):
-    notes = load_notes()
-    new_note = {
+def load_notes():
+    return list(notes_col.find({}, {"_id": 0}))
+
+
+def save_note(student_name, subject, chapter, filename, image_url, formatted_notes):
+    notes_col.insert_one({
         "student_name": student_name,
         "subject": subject,
         "chapter": chapter,
         "filename": filename,
+        "image_url": image_url,
         "date": str(date.today()),
         "formatted_notes": formatted_notes,
         "pinned": False
-    }
-    notes.append(new_note)
-    with open(NOTES_FILE, "w") as f:
-        json.dump({"notes": notes}, f, indent=2)
+    })
+
 
 @app.route("/")
 def home():
     return render_template("index.html", subjects=SUBJECTS)
+
 
 @app.route("/status")
 def status():
@@ -103,6 +102,7 @@ def status():
         )
     return jsonify(result)
 
+
 @app.route("/archive")
 def archive():
     notes = load_notes()
@@ -115,6 +115,7 @@ def archive():
     total_notes = sum(len(v) for v in grouped.values())
     return render_template("archive.html", grouped=grouped, total_notes=total_notes)
 
+
 @app.route("/upload", methods=["POST"])
 def upload():
     student_name = request.form.get("student_name")
@@ -125,11 +126,23 @@ def upload():
     if not image or image.filename == "":
         return "No image uploaded. Please go back and try again."
 
-    image_path = os.path.join(app.config["UPLOAD_FOLDER"], image.filename)
-    image.save(image_path)
+    # Read bytes directly — no saving to disk (Vercel is read-only)
+    image_bytes = image.read()
+    ext = image.filename.rsplit(".", 1)[-1].lower()
 
-    formatted_notes = extract_and_format_notes(image_path, subject)
-    save_note(student_name, subject, chapter, image.filename, formatted_notes)
+    # Upload to Cloudinary
+    upload_result = cloudinary.uploader.upload(
+        image_bytes,
+        folder="notesphere",
+        resource_type="image"
+    )
+    image_url = upload_result["secure_url"]
+
+    # Extract notes via Groq
+    formatted_notes = extract_and_format_notes(image_bytes, ext, subject)
+
+    # Save to MongoDB
+    save_note(student_name, subject, chapter, image.filename, image_url, formatted_notes)
 
     return render_template("result.html",
         student_name=student_name,
@@ -138,69 +151,69 @@ def upload():
         date_today=str(date.today().strftime("%b %d, %Y")),
         filename=image.filename,
         formatted_notes=formatted_notes,
-        image_url=f"/static/uploads/{image.filename}"
+        image_url=image_url
     )
+
 
 @app.route("/edit_note", methods=["POST"])
 def edit_note():
     data = request.get_json()
-    subject     = data.get("subject")
-    index       = data.get("index")
+    subject = data.get("subject")
+    index = data.get("index")
     new_student = data.get("student_name", "").strip()
     new_content = data.get("formatted_notes", "").strip()
+
     if not subject or index is None or not new_student or not new_content:
         return jsonify({"error": "Missing fields"}), 400
-    notes = load_notes()
-    subject_notes = [n for n in notes if n["subject"] == subject]
+
+    subject_notes = list(notes_col.find({"subject": subject}, {"_id": 1}))
     if index < 0 or index >= len(subject_notes):
         return jsonify({"error": "Note not found"}), 404
-    target = subject_notes[index]
-    for note in notes:
-        if note is target:
-            note["student_name"]    = new_student
-            note["formatted_notes"] = new_content
-            break
-    with open(NOTES_FILE, "w") as f:
-        json.dump({"notes": notes}, f, indent=2)
+
+    notes_col.update_one(
+        {"_id": subject_notes[index]["_id"]},
+        {"$set": {"student_name": new_student, "formatted_notes": new_content}}
+    )
     return jsonify({"success": True})
+
 
 @app.route("/delete_note", methods=["POST"])
 def delete_note():
-    data    = request.get_json()
+    data = request.get_json()
     subject = data.get("subject")
-    index   = data.get("index")
+    index = data.get("index")
+
     if not subject or index is None:
         return jsonify({"error": "Missing fields"}), 400
-    notes = load_notes()
-    subject_notes = [n for n in notes if n["subject"] == subject]
+
+    subject_notes = list(notes_col.find({"subject": subject}, {"_id": 1}))
     if index < 0 or index >= len(subject_notes):
         return jsonify({"error": "Note not found"}), 404
-    target = subject_notes[index]
-    notes  = [n for n in notes if n is not target]
-    with open(NOTES_FILE, "w") as f:
-        json.dump({"notes": notes}, f, indent=2)
+
+    notes_col.delete_one({"_id": subject_notes[index]["_id"]})
     return jsonify({"success": True})
+
 
 @app.route("/pin_note", methods=["POST"])
 def pin_note():
-    data    = request.get_json()
+    data = request.get_json()
     subject = data.get("subject")
-    index   = data.get("index")
-    pinned  = data.get("pinned", True)
+    index = data.get("index")
+    pinned = data.get("pinned", True)
+
     if not subject or index is None:
         return jsonify({"error": "Missing fields"}), 400
-    notes = load_notes()
-    subject_notes = [n for n in notes if n["subject"] == subject]
+
+    subject_notes = list(notes_col.find({"subject": subject}, {"_id": 1}))
     if index < 0 or index >= len(subject_notes):
         return jsonify({"error": "Note not found"}), 404
-    target = subject_notes[index]
-    for note in notes:
-        if note is target:
-            note["pinned"] = pinned
-            break
-    with open(NOTES_FILE, "w") as f:
-        json.dump({"notes": notes}, f, indent=2)
+
+    notes_col.update_one(
+        {"_id": subject_notes[index]["_id"]},
+        {"$set": {"pinned": pinned}}
+    )
     return jsonify({"success": True})
+
 
 if __name__ == "__main__":
     app.run(debug=True)
