@@ -1,6 +1,3 @@
-import sys
-sys.path.insert(0, '/var/task/lib/python3.9/site-packages')
-
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import os
@@ -9,8 +6,8 @@ from datetime import date
 from groq import Groq
 import cloudinary
 import cloudinary.uploader
-from pymongo import MongoClient
-import certifi
+import psycopg2
+import psycopg2.extras
 
 load_dotenv()
 
@@ -24,18 +21,15 @@ cloudinary.config(
     api_secret=os.getenv("CLOUDINARY_API_SECRET")
 )
 
-# ── MongoDB ─────────────────────────────────────────────────
-mongo_client = MongoClient(
-    os.getenv("MONGODB_URI"),
-    serverSelectionTimeoutMS=5000,
-    tls=True,
-    tlsAllowInvalidCertificates=True
-)
-db = mongo_client["notesphere"]
-notes_col = db["notes"]
-
 # ── Groq ────────────────────────────────────────────────────
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+
+def get_db():
+    return psycopg2.connect(
+        os.getenv("DATABASE_URL"),
+        cursor_factory=psycopg2.extras.RealDictCursor
+    )
 
 
 def extract_and_format_notes(image_bytes, ext, subject):
@@ -78,23 +72,28 @@ Return only the formatted notes in markdown, nothing else."""
 
 def load_notes():
     try:
-        return list(notes_col.find({}, {"_id": 0}))
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM notes ORDER BY id ASC")
+        notes = [dict(row) for row in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return notes
     except Exception as e:
         print(f"load_notes error: {e}")
         return []
 
 
 def save_note(student_name, subject, chapter, filename, image_url, formatted_notes):
-    notes_col.insert_one({
-        "student_name": student_name,
-        "subject": subject,
-        "chapter": chapter,
-        "filename": filename,
-        "image_url": image_url,
-        "date": str(date.today()),
-        "formatted_notes": formatted_notes,
-        "pinned": False
-    })
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO notes (student_name, subject, chapter, filename, image_url, date, formatted_notes, pinned)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """, (student_name, subject, chapter, filename, image_url, str(date.today()), formatted_notes, False))
+    conn.commit()
+    cur.close()
+    conn.close()
 
 
 @app.route("/")
@@ -155,7 +154,7 @@ def upload():
     # Extract notes via Groq
     formatted_notes = extract_and_format_notes(image_bytes, ext, subject)
 
-    # Save to MongoDB
+    # Save to Neon
     try:
         save_note(student_name, subject, chapter, image.filename, image_url, formatted_notes)
     except Exception as e:
@@ -183,14 +182,19 @@ def edit_note():
     if not subject or index is None or not new_student or not new_content:
         return jsonify({"error": "Missing fields"}), 400
 
-    subject_notes = list(notes_col.find({"subject": subject}, {"_id": 1}))
-    if index < 0 or index >= len(subject_notes):
+    notes = [n for n in load_notes() if n["subject"] == subject]
+    if index < 0 or index >= len(notes):
         return jsonify({"error": "Note not found"}), 404
 
-    notes_col.update_one(
-        {"_id": subject_notes[index]["_id"]},
-        {"$set": {"student_name": new_student, "formatted_notes": new_content}}
-    )
+    note_id = notes[index]["id"]
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        UPDATE notes SET student_name=%s, formatted_notes=%s WHERE id=%s
+    """, (new_student, new_content, note_id))
+    conn.commit()
+    cur.close()
+    conn.close()
     return jsonify({"success": True})
 
 
@@ -203,11 +207,17 @@ def delete_note():
     if not subject or index is None:
         return jsonify({"error": "Missing fields"}), 400
 
-    subject_notes = list(notes_col.find({"subject": subject}, {"_id": 1}))
-    if index < 0 or index >= len(subject_notes):
+    notes = [n for n in load_notes() if n["subject"] == subject]
+    if index < 0 or index >= len(notes):
         return jsonify({"error": "Note not found"}), 404
 
-    notes_col.delete_one({"_id": subject_notes[index]["_id"]})
+    note_id = notes[index]["id"]
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM notes WHERE id=%s", (note_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
     return jsonify({"success": True})
 
 
@@ -221,14 +231,17 @@ def pin_note():
     if not subject or index is None:
         return jsonify({"error": "Missing fields"}), 400
 
-    subject_notes = list(notes_col.find({"subject": subject}, {"_id": 1}))
-    if index < 0 or index >= len(subject_notes):
+    notes = [n for n in load_notes() if n["subject"] == subject]
+    if index < 0 or index >= len(notes):
         return jsonify({"error": "Note not found"}), 404
 
-    notes_col.update_one(
-        {"_id": subject_notes[index]["_id"]},
-        {"$set": {"pinned": pinned}}
-    )
+    note_id = notes[index]["id"]
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("UPDATE notes SET pinned=%s WHERE id=%s", (pinned, note_id))
+    conn.commit()
+    cur.close()
+    conn.close()
     return jsonify({"success": True})
 
 
