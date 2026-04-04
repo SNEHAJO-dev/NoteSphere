@@ -22,8 +22,15 @@ cloudinary.config(
 )
 
 # ── MongoDB ─────────────────────────────────────────────────
-mongo_client = MongoClient(os.getenv("MONGODB_URI"))
+import ssl
+mongo_client = MongoClient(
+    os.getenv("MONGODB_URI"),
+    tls=True,
+    tlsAllowInvalidCertificates=True
+)
+import ssl
 db = mongo_client["notesphere"]
+import ssl
 notes_col = db["notes"]
 
 # ── Groq ────────────────────────────────────────────────────
