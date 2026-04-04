@@ -2,16 +2,17 @@ from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import os
 import base64
+import ssl
 from datetime import date
 from groq import Groq
 import cloudinary
 import cloudinary.uploader
 from pymongo import MongoClient
+import certifi
 
 load_dotenv()
 
 app = Flask(__name__)
-
 SUBJECTS = ["Humanities", "Physics", "Maths", "ECE"]
 
 # ── Cloudinary ──────────────────────────────────────────────
@@ -22,15 +23,12 @@ cloudinary.config(
 )
 
 # ── MongoDB ─────────────────────────────────────────────────
-import ssl
 mongo_client = MongoClient(
     os.getenv("MONGODB_URI"),
     tls=True,
-    tlsAllowInvalidCertificates=True
+    tlsCAFile=certifi.where()
 )
-import ssl
 db = mongo_client["notesphere"]
-import ssl
 notes_col = db["notes"]
 
 # ── Groq ────────────────────────────────────────────────────
@@ -138,12 +136,15 @@ def upload():
     ext = image.filename.rsplit(".", 1)[-1].lower()
 
     # Upload to Cloudinary
-    upload_result = cloudinary.uploader.upload(
-        image_bytes,
-        folder="notesphere",
-        resource_type="image"
-    )
-    image_url = upload_result["secure_url"]
+    try:
+        upload_result = cloudinary.uploader.upload(
+            image_bytes,
+            folder="notesphere",
+            resource_type="image"
+        )
+        image_url = upload_result["secure_url"]
+    except Exception as e:
+        return f"Image upload failed: {str(e)}", 500
 
     # Extract notes via Groq
     formatted_notes = extract_and_format_notes(image_bytes, ext, subject)
