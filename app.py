@@ -1,8 +1,10 @@
+import sys
+sys.path.insert(0, '/var/task/lib/python3.9/site-packages')
+
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import os
 import base64
-import ssl
 from datetime import date
 from groq import Groq
 import cloudinary
@@ -25,8 +27,9 @@ cloudinary.config(
 # ── MongoDB ─────────────────────────────────────────────────
 mongo_client = MongoClient(
     os.getenv("MONGODB_URI"),
+    serverSelectionTimeoutMS=5000,
     tls=True,
-    tlsCAFile=certifi.where()
+    tlsAllowInvalidCertificates=True
 )
 db = mongo_client["notesphere"]
 notes_col = db["notes"]
@@ -74,7 +77,11 @@ Return only the formatted notes in markdown, nothing else."""
 
 
 def load_notes():
-    return list(notes_col.find({}, {"_id": 0}))
+    try:
+        return list(notes_col.find({}, {"_id": 0}))
+    except Exception as e:
+        print(f"load_notes error: {e}")
+        return []
 
 
 def save_note(student_name, subject, chapter, filename, image_url, formatted_notes):
@@ -131,7 +138,6 @@ def upload():
     if not image or image.filename == "":
         return "No image uploaded. Please go back and try again."
 
-    # Read bytes directly — no saving to disk (Vercel is read-only)
     image_bytes = image.read()
     ext = image.filename.rsplit(".", 1)[-1].lower()
 
@@ -150,7 +156,10 @@ def upload():
     formatted_notes = extract_and_format_notes(image_bytes, ext, subject)
 
     # Save to MongoDB
-    save_note(student_name, subject, chapter, image.filename, image_url, formatted_notes)
+    try:
+        save_note(student_name, subject, chapter, image.filename, image_url, formatted_notes)
+    except Exception as e:
+        return f"Database save failed: {str(e)}", 500
 
     return render_template("result.html",
         student_name=student_name,
